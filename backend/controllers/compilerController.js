@@ -8,17 +8,17 @@ exports.runCode = async (req, res) => {
 
   // code is empty
   if (!code) {
-    return res.status(400).json({ error: "Code is required" });
+    return res.status(400).json({ error: "Code is required", status: "ERROR" });
   }
 
   try {
     const filePath = await this.generateFile(language, code);
     const output = await this.executeCpp(filePath);
 
-    res.json({ filePath, output });
+    res.json({ filePath, output, status: "SUCCESS" });
   } catch (error) {
     console.log("Error in Running Code", error);
-    res.status(500).json({ error: "Internal Server" });
+    res.status(500).json({ error: "Internal Server", status: "ERROR" });
   }
 };
 

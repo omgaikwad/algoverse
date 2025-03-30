@@ -19,7 +19,11 @@ exports.addProblem = async (req, res) => {
 
     res
       .status(201)
-      .json({ message: "Problem added successfully", status: true, problem });
+      .json({
+        message: "Problem added successfully",
+        status: "SUCCESS",
+        problem,
+      });
   } catch (error) {
     console.log("Error in Add Problem", error);
     res.status(500).json({ error: "Internal Server Error" });
