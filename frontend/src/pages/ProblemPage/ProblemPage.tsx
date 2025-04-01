@@ -7,11 +7,15 @@ import "prismjs/themes/prism.css"; // Optional: You can choose a different theme
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import axios from "axios";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 const ProblemPage = () => {
   const [code, setCode] = useState(
     `#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << "Hello, World!" << endl;\n    return 0;\n}`
   );
+
+  const [input, setInput] = useState("");
 
   const [codeOutput, setCodeOutput] = useState("");
 
@@ -25,6 +29,7 @@ const ProblemPage = () => {
         {
           code: code,
           language: "cpp",
+          input: input,
         },
         {
           headers: {
@@ -48,7 +53,7 @@ const ProblemPage = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
+    <div className="flex flex-col items-center justify-center h-screen p-8">
       {/* Code Editor */}
       <Editor
         value={code}
@@ -72,6 +77,23 @@ const ProblemPage = () => {
           overflowWrap: "break-word",
         }}
       />
+
+      {/* Input */}
+
+      <div className="mt-4 p-4 border border-gray-300 rounded-lg w-1/2">
+        <div className="flex flex-col space-y-1.5">
+          <Label htmlFor="input" className="text-lg font-semibold">
+            Input
+          </Label>
+          <Textarea
+            required
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            id="input"
+            placeholder="Input"
+          />
+        </div>
+      </div>
 
       {/* Submit Button */}
       <Button className="mt-4" onClick={handleRunCode}>

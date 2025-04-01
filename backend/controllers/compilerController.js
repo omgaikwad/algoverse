@@ -4,7 +4,7 @@ const { v4: uuidv4 } = require("uuid");
 const { exec } = require("child_process");
 
 exports.runCode = async (req, res) => {
-  const { language, code } = req.body;
+  const { language, code, input } = req.body;
 
   // code is empty
   if (!code) {
@@ -13,9 +13,10 @@ exports.runCode = async (req, res) => {
 
   try {
     const filePath = await this.generateFile(language, code);
-    const output = await this.executeCpp(filePath);
+    const inputFilePath = await this.generateInputFile(input);
+    const output = await this.executeCpp(filePath, inputFilePath);
 
-    res.json({ filePath, output, status: "SUCCESS" });
+    res.json({ filePath, inputFilePath, output, status: "SUCCESS" });
   } catch (error) {
     console.log("Error in Running Code", error);
     res.status(500).json({ error: "Internal Server", status: "ERROR" });
@@ -38,7 +39,23 @@ exports.generateFile = async (format, content) => {
   return filePath;
 };
 
-exports.executeCpp = (filePath) => {
+exports.generateInputFile = async (input) => {
+  const dirInputs = path.join(__dirname, "../inputs");
+
+  // if folder not exist then create folder
+  if (!fs.existsSync(dirInputs)) {
+    fs.mkdirSync(dirInputs, { recursive: true });
+  }
+
+  const jobId = uuidv4();
+  const inputFileName = `${jobId}.txt`;
+  const inputFilePath = path.join(dirInputs, inputFileName);
+  await fs.writeFileSync(inputFilePath, input);
+
+  return inputFilePath;
+};
+
+exports.executeCpp = (filePath, inputFilePath) => {
   const outputPathDir = path.join(__dirname, "../outputs");
 
   // if folder not exist then create folder
@@ -51,7 +68,7 @@ exports.executeCpp = (filePath) => {
 
   return new Promise((resolve, reject) => {
     exec(
-      `g++ ${filePath} -o ${outPath} && cd ${outputPathDir} && .\\${jobId}.exe`,
+      `g++ ${filePath} -o ${outPath} && cd ${outputPathDir} && .\\${jobId}.exe < ${inputFilePath}`,
       (error, stdout, stderr) => {
         if (error) {
           console.log(
