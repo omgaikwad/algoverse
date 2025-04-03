@@ -64,30 +64,35 @@ exports.executeCpp = (filePath, inputFilePath) => {
   }
 
   const jobId = path.basename(filePath).split(".")[0];
-  const outPath = path.join(outputPathDir, `${jobId}.exe`);
+  const isWindows = process.platform === "win32"; // Check if the OS is Windows
+  const outPath = path.join(
+    outputPathDir,
+    `${jobId}${isWindows ? ".exe" : ""}`
+  ); // Add .exe only for Windows
 
   return new Promise((resolve, reject) => {
-    exec(
-      `g++ ${filePath} -o ${outPath} && cd ${outputPathDir} && .\\${jobId}.exe < ${inputFilePath}`,
-      (error, stdout, stderr) => {
-        if (error) {
-          console.log(
-            "🚀 ~ file: compilerController.js ~ line 85 ~ exec ~ error",
-            error
-          );
-          reject({ error, stderr });
-        }
+    const runCommand = isWindows
+      ? `g++ ${filePath} -o ${outPath} && cd ${outputPathDir} && .\\${jobId}.exe < ${inputFilePath}`
+      : `g++ ${filePath} -o ${outPath} && ${outPath} < ${inputFilePath}`; // Linux command
 
-        if (stderr) {
-          console.log(
-            "🚀 ~ file: compilerController.js ~ line 85 ~ exec ~ stderr",
-            stderr
-          );
-          reject(stderr);
-        }
-
-        resolve(stdout);
+    exec(runCommand, (error, stdout, stderr) => {
+      if (error) {
+        console.log(
+          "🚀 ~ file: compilerController.js ~ line 85 ~ exec ~ error",
+          error
+        );
+        reject({ error, stderr });
       }
-    );
+
+      if (stderr) {
+        console.log(
+          "🚀 ~ file: compilerController.js ~ line 85 ~ exec ~ stderr",
+          stderr
+        );
+        reject(stderr);
+      }
+
+      resolve(stdout);
+    });
   });
 };
