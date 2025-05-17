@@ -5,6 +5,8 @@ const cors = require("cors");
 
 const app = express();
 
+// TEST
+
 // Enable CORS
 app.use(
   cors({
